@@ -1,5 +1,7 @@
 export const STORAGE_KEY = "viewtube-prop-settings-v2";
 const LEGACY_STORAGE_KEY = "viewtube-prop-settings-v1";
+const LEGACY_DEFAULT_HASHTAGS = "#발표꿀팁 #학교생활 #중학생 #혜민의교실생활";
+const DEFAULT_HASHTAGS = "#발표꿀팁 #학교생활 #초등학생 #혜민의교실생활";
 export const VIDEO_DURATION_SECONDS = 136;
 
 export type PropComment = {
@@ -13,6 +15,8 @@ export type PropComment = {
 export type PropSettings = {
   videoTitle: string;
   hashtags: string;
+  likeCount: number;
+  dislikeCount: number;
   pausedAtSeconds: number;
   showPlayButton: boolean;
   startCount: number;
@@ -25,7 +29,9 @@ export type PropSettings = {
 
 export const DEFAULT_SETTINGS: PropSettings = {
   videoTitle: "발표할 때 심장 안 떨리는 꿀팁!",
-  hashtags: "#발표꿀팁 #학교생활 #중학생 #혜민의교실생활",
+  hashtags: DEFAULT_HASHTAGS,
+  likeCount: 12,
+  dislikeCount: 0,
   pausedAtSeconds: 3,
   showPlayButton: false,
   startCount: 97,
@@ -78,7 +84,16 @@ export function readStoredSettings(): PropSettings {
       videoTitle: typeof stored.videoTitle === "string" && stored.videoTitle.trim()
         ? stored.videoTitle
         : DEFAULT_SETTINGS.videoTitle,
-      hashtags: typeof stored.hashtags === "string" ? stored.hashtags : DEFAULT_SETTINGS.hashtags,
+      // 사용자가 수정하지 않은 과거 기본 해시태그만 새 학교급 표기로 전환한다.
+      hashtags: stored.hashtags === LEGACY_DEFAULT_HASHTAGS
+        ? DEFAULT_HASHTAGS
+        : typeof stored.hashtags === "string" ? stored.hashtags : DEFAULT_SETTINGS.hashtags,
+      likeCount: Number.isFinite(stored.likeCount)
+        ? Math.max(0, Math.floor(Number(stored.likeCount)))
+        : DEFAULT_SETTINGS.likeCount,
+      dislikeCount: Number.isFinite(stored.dislikeCount)
+        ? Math.max(0, Math.floor(Number(stored.dislikeCount)))
+        : DEFAULT_SETTINGS.dislikeCount,
       pausedAtSeconds: Number.isFinite(stored.pausedAtSeconds)
         ? Math.min(VIDEO_DURATION_SECONDS, Math.max(0, Number(stored.pausedAtSeconds)))
         : DEFAULT_SETTINGS.pausedAtSeconds,

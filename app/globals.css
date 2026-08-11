@@ -165,7 +165,8 @@ a:focus-visible {
 .video-stage {
   position: relative;
   aspect-ratio: 16 / 9;
-  overflow: hidden;
+  margin-bottom: 8px;
+  overflow: visible;
   background: #171717;
 }
 
@@ -527,6 +528,17 @@ textarea {
   background: transparent;
   color: #ddd;
   font-size: 13px;
+}
+
+.quick-reset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.quick-reset-grid .secondary-button {
+  min-width: 0;
+  padding-inline: 8px;
 }
 
 .secondary-button svg {

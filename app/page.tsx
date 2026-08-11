@@ -195,8 +195,12 @@ export default function HomePage() {
           </p>
 
           <div className="action-rail" data-no-count>
-            <button type="button" aria-label="좋아요 12개"><ThumbsUp /><strong>12</strong></button>
-            <button type="button" aria-label="싫어요"><ThumbsDown /><span>싫어요</span></button>
+            <button type="button" aria-label={`좋아요 ${formatCount(settings.likeCount)}개`}>
+              <ThumbsUp /><strong>{formatCount(settings.likeCount)}</strong>
+            </button>
+            <button type="button" aria-label={`싫어요 ${formatCount(settings.dislikeCount)}개`}>
+              <ThumbsDown /><strong>{formatCount(settings.dislikeCount)}</strong>
+            </button>
             <button type="button" aria-label="공유"><Share2 /><span>공유</span></button>
             <button type="button" aria-label="리믹스"><Expand /><span>리믹스</span></button>
           </div>
@@ -252,7 +256,7 @@ export default function HomePage() {
               <div className="description-body">
                 <h3>{settings.videoTitle}</h3>
                 <div className="description-stats">
-                  <div><strong>12</strong><span>좋아요</span></div>
+                  <div><strong>{formatCount(settings.likeCount)}</strong><span>좋아요</span></div>
                   <div><strong>{formatCount(settings.viewCount)}</strong><span>조회수</span></div>
                   <div><strong>6월 26일</strong><span>2026년</span></div>
                 </div>
