@@ -25,9 +25,11 @@ import { MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "r
 import {
   DEFAULT_SETTINGS,
   formatCount,
+  formatVideoTime,
   PropSettings,
   readStoredSettings,
   saveStoredSettings,
+  VIDEO_DURATION_SECONDS,
 } from "./lib/prop-settings";
 
 function FakeStatusBar({ time, battery }: { time: string; battery: number }) {
@@ -108,6 +110,7 @@ export default function HomePage() {
     () => settings.comments.filter((comment) => visibleCommentIds.has(comment.id)),
     [settings.comments, visibleCommentIds],
   );
+  const progressPercent = Math.min(100, Math.max(0, (settings.pausedAtSeconds / VIDEO_DURATION_SECONDS) * 100));
 
   const increaseViewCount = useCallback(() => {
     setSettings((current) => {
@@ -165,11 +168,15 @@ export default function HomePage() {
             draggable="false"
           />
           <div className="video-shade" />
-          <span className="pause-play" aria-hidden="true"><Play size={38} fill="white" /></span>
-          <span className="video-time">1:28 / 2:16</span>
-          <div className="progress-track" aria-label="영상 재생 진행률 65%">
-            <div className="progress-value" />
-            <span className="progress-thumb" />
+          {settings.showPlayButton && (
+            <span className="pause-play" aria-hidden="true"><Play size={38} fill="white" /></span>
+          )}
+          <span className="video-time">
+            {formatVideoTime(settings.pausedAtSeconds)} / {formatVideoTime(VIDEO_DURATION_SECONDS)}
+          </span>
+          <div className="progress-track" aria-label={`영상 재생 진행률 ${Math.round(progressPercent)}%`}>
+            <div className="progress-value" style={{ width: `${progressPercent}%` }} />
+            <span className="progress-thumb" style={{ left: `${progressPercent}%` }} />
           </div>
         </div>
 
@@ -220,8 +227,6 @@ export default function HomePage() {
               <p className="empty-comment">아직 댓글이 없습니다.</p>
             )}
           </section>
-
-          <p className="tap-hint"><Plus size={15} /> 화면의 빈 곳을 한 번 터치하면 조회수가 1 올라갑니다</p>
 
           <div className="settings-entry" data-no-count>
             <Link href="/settings" aria-label="촬영 설정 페이지 열기">

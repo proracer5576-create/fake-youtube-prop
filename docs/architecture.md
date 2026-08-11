@@ -15,7 +15,7 @@
 - `showFakeStatusBar`: 가짜 상태 표시줄 표시 여부.
 - `fakeTime`, `battery`: 촬영용 표시값.
 - `comments[]`: 댓글 ID, 작성자, 내용, 등장 조회수, 지연 초.
-- `videoTitle`, `hashtags`: 촬영 화면과 설명 창이 공유하는 영상 정보.
+- `videoTitle`, `hashtags`, `pausedAtSeconds`, `showPlayButton`: 촬영 화면과 설명 창이 공유하는 영상 정보 및 플레이어 표시 설정.
 - 모든 값은 오류 처리된 localStorage 어댑터를 통해 저장한다.
 
 ## 이벤트 경계

@@ -20,6 +20,7 @@ import {
   PropSettings,
   readStoredSettings,
   saveStoredSettings,
+  VIDEO_DURATION_SECONDS,
 } from "../lib/prop-settings";
 
 export default function SettingsPage() {
@@ -193,6 +194,33 @@ export default function SettingsPage() {
                 placeholder="#발표꿀팁 #학교생활"
               />
               <p>띄어쓰기 또는 쉼표로 여러 개를 구분하세요.</p>
+              <label htmlFor="paused-at">영상이 멈춘 시점(초)</label>
+              <input
+                id="paused-at"
+                type="number"
+                inputMode="numeric"
+                min="0"
+                max={VIDEO_DURATION_SECONDS}
+                value={settings.pausedAtSeconds}
+                onChange={(event) => setSettings((current) => ({
+                  ...current,
+                  pausedAtSeconds: Math.min(VIDEO_DURATION_SECONDS, Math.max(0, Number(event.target.value))),
+                }))}
+              />
+              <p>0~{VIDEO_DURATION_SECONDS}초 사이로 입력하세요. 기본값은 3초입니다.</p>
+              <span className="setting-label">중앙 재생 버튼</span>
+              <div className="segmented-control" role="group" aria-label="중앙 재생 버튼 표시">
+                <button
+                  type="button"
+                  className={!settings.showPlayButton ? "active" : ""}
+                  onClick={() => setSettings((current) => ({ ...current, showPlayButton: false }))}
+                >숨김</button>
+                <button
+                  type="button"
+                  className={settings.showPlayButton ? "active" : ""}
+                  onClick={() => setSettings((current) => ({ ...current, showPlayButton: true }))}
+                >표시</button>
+              </div>
             </div>
           </section>
 

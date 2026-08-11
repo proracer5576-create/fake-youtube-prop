@@ -222,7 +222,6 @@ a:focus-visible {
 }
 
 .progress-value {
-  width: 65%;
   height: 100%;
   background: var(--red);
 }
@@ -230,7 +229,6 @@ a:focus-visible {
 .progress-thumb {
   position: absolute;
   top: 50%;
-  left: 65%;
   width: 13px;
   height: 13px;
   border-radius: 50%;
@@ -429,22 +427,11 @@ a:focus-visible {
   font-size: 13px;
 }
 
-.tap-hint {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  margin: 14px 0 36px;
-  color: #777;
-  font-size: 12px;
-  text-align: center;
-}
-
 .settings-entry {
   display: grid;
   justify-items: center;
   gap: 9px;
-  padding: 92px 0 10px;
+  padding: 130px 0 10px;
 }
 
 .settings-entry a {

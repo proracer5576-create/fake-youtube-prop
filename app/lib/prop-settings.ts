@@ -1,5 +1,6 @@
 export const STORAGE_KEY = "viewtube-prop-settings-v2";
 const LEGACY_STORAGE_KEY = "viewtube-prop-settings-v1";
+export const VIDEO_DURATION_SECONDS = 136;
 
 export type PropComment = {
   id: string;
@@ -12,6 +13,8 @@ export type PropComment = {
 export type PropSettings = {
   videoTitle: string;
   hashtags: string;
+  pausedAtSeconds: number;
+  showPlayButton: boolean;
   startCount: number;
   viewCount: number;
   showFakeStatusBar: boolean;
@@ -23,6 +26,8 @@ export type PropSettings = {
 export const DEFAULT_SETTINGS: PropSettings = {
   videoTitle: "발표할 때 심장 안 떨리는 꿀팁!",
   hashtags: "#발표꿀팁 #학교생활 #중학생 #혜민의교실생활",
+  pausedAtSeconds: 3,
+  showPlayButton: false,
   startCount: 97,
   viewCount: 97,
   showFakeStatusBar: false,
@@ -74,6 +79,10 @@ export function readStoredSettings(): PropSettings {
         ? stored.videoTitle
         : DEFAULT_SETTINGS.videoTitle,
       hashtags: typeof stored.hashtags === "string" ? stored.hashtags : DEFAULT_SETTINGS.hashtags,
+      pausedAtSeconds: Number.isFinite(stored.pausedAtSeconds)
+        ? Math.min(VIDEO_DURATION_SECONDS, Math.max(0, Number(stored.pausedAtSeconds)))
+        : DEFAULT_SETTINGS.pausedAtSeconds,
+      showPlayButton: Boolean(stored.showPlayButton),
       startCount: Number.isFinite(stored.startCount) ? Math.max(0, Number(stored.startCount)) : DEFAULT_SETTINGS.startCount,
       viewCount: Number.isFinite(stored.viewCount) ? Math.max(0, Number(stored.viewCount)) : DEFAULT_SETTINGS.viewCount,
       showFakeStatusBar: Boolean(stored.showFakeStatusBar),
@@ -101,4 +110,11 @@ export function saveStoredSettings(settings: PropSettings) {
 
 export function formatCount(value: number) {
   return new Intl.NumberFormat("ko-KR").format(value);
+}
+
+export function formatVideoTime(totalSeconds: number) {
+  const safeSeconds = Math.max(0, Math.floor(totalSeconds));
+  const minutes = Math.floor(safeSeconds / 60);
+  const seconds = String(safeSeconds % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
 }

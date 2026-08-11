@@ -38,9 +38,14 @@ test("100회 댓글 등장과 전체화면 제어 코드를 포함한다", async
   assert.match(settingsModel, /좀 지루해요/);
   assert.match(settingsModel, /triggerCount: 100/);
   assert.match(settingsModel, /delaySeconds: 3/);
+  assert.match(settingsModel, /pausedAtSeconds: 3/);
+  assert.match(settingsModel, /showPlayButton: false/);
   assert.match(page, /setTimeout/);
   assert.match(page, /description-sheet/);
+  assert.match(page, /settings\.showPlayButton/);
+  assert.doesNotMatch(page, /화면의 빈 곳을 한 번 터치하면/);
   assert.match(settingsPage, /댓글과 등장 타이밍/);
+  assert.match(settingsPage, /영상이 멈춘 시점/);
   assert.match(settingsPage, /requestFullscreen/);
   assert.match(page, /viewCount: current\.viewCount \+ 1/);
   assert.match(settingsModel, /localStorage/);
