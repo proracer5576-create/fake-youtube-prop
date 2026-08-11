@@ -36,3 +36,13 @@ npm run build:pages
 ## 배포
 
 `.github/workflows/deploy-pages.yml`이 `main` 또는 `agent/github-pages-deploy` 브랜치의 변경을 정적 사이트로 빌드해 GitHub Pages에 배포합니다.
+
+## 오프라인 단일 HTML
+
+`standalone/viewtube-prop.html`은 썸네일·스타일·동작을 모두 포함한 한 파일짜리 버전입니다. 인터넷 연결 없이 파일을 브라우저로 열어 사용할 수 있습니다.
+
+다시 생성하려면 다음 명령을 실행합니다.
+
+```bash
+npm run build:standalone
+```
