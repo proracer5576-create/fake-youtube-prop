@@ -8,6 +8,7 @@
 5. `DescriptionSheet`: 제목, 통계, 업로드 시점, 해시태그를 보여주는 하단 설명 창.
 6. `SettingsPage`: 시작 숫자, 상태 표시줄, 시간, 배터리, 제목/해시태그, 댓글 내용/조건/지연, 초기화, 전체화면 제어.
 7. `prop-settings`: 두 페이지가 공유하는 localStorage 설정 모델과 기본값.
+8. `deploy-pages.yml`: 정적 Next.js 빌드 산출물을 GitHub Pages에 자동 배포하는 워크플로우.
 
 ## 상태
 - `viewCount`: 현재 조회수.
@@ -26,3 +27,8 @@
 - Fullscreen API 실패 시 화면 내 안내 메시지를 표시한다.
 - 댓글은 기준 조회수 도달 즉시 또는 `delaySeconds` 타이머 완료 후 순서대로 나타난다.
 - 현재 조회수가 기준 아래로 초기화되면 지연 타이머와 댓글 노출 상태를 함께 초기화한다.
+
+## 배포 분기
+- 일반 개발/검증: Vinext 빌드와 루트 경로 사용.
+- GitHub Pages: `GITHUB_PAGES=true`에서 정적 export와 `/fake-youtube-prop` base path 사용.
+- 공개 자산은 `NEXT_PUBLIC_BASE_PATH`를 통해 두 환경에서 같은 컴포넌트 코드를 사용한다.

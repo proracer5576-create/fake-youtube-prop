@@ -1,100 +1,38 @@
-# vinext-starter
+# ViewTube Film Prop
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+영화 촬영을 위해 만든 가상의 모바일 동영상 앱 화면입니다. 빈 화면을 한 번 터치할 때마다 조회수가 1씩 증가하고, 설정한 조회수와 시간에 맞춰 댓글이 순서대로 나타납니다.
 
-## Prerequisites
+## 주요 기능
 
-- Node.js `>=22.13.0`
+- 터치 한 번마다 조회수 1 증가
+- 기본 45회 댓글, 100회 댓글 및 지연 댓글 연출
+- 댓글 내용·작성자·등장 조회수·지연 시간 편집
+- 영상 제목·해시태그·멈춘 시점·재생 버튼 표시 설정
+- 실제 시스템 표시줄 숨김과 수정 가능한 가짜 상태 표시줄
+- 모바일 세로 화면 및 데스크톱 430px 휴대폰 프레임
+- 설정값을 브라우저에 자동 저장
 
-## Quick Start
+하단 메뉴 맨 오른쪽의 `혜 / 나` 프로필을 누르면 촬영 설정으로 들어갑니다.
+
+## 로컬 실행
+
+Node.js 22.13 이상이 필요합니다.
 
 ```bash
 npm install
 npm run dev
-npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+개발 주소는 `http://localhost:3000`입니다.
 
-## Included Shape
+## 검증
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
-
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```bash
+npx tsc --noEmit
+npm test
+npm run build:pages
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+## 배포
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+`.github/workflows/deploy-pages.yml`이 `main` 또는 `agent/github-pages-deploy` 브랜치의 변경을 정적 사이트로 빌드해 GitHub Pages에 배포합니다.

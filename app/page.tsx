@@ -31,6 +31,8 @@ import {
   VIDEO_DURATION_SECONDS,
 } from "./lib/prop-settings";
 
+const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 function FakeStatusBar({ time, battery }: { time: string; battery: number }) {
   return (
     <div className="fake-status-bar" aria-label={`가짜 상태 표시줄, ${time}, 배터리 ${battery}%`}>
@@ -162,7 +164,7 @@ export default function HomePage() {
 
         <div className="video-stage" aria-label="일시정지된 영상, 1분 28초">
           <img
-            src="/movie-thumbnail.webp"
+            src={`${PUBLIC_BASE_PATH}/movie-thumbnail.webp`}
             alt="교실에서 세 학생이 발표할 때 긴장하지 않는 팁을 소개하는 영상 썸네일"
             draggable="false"
           />
