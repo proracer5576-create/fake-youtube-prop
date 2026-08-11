@@ -23,3 +23,9 @@
 - 외부 아이콘 패키지는 사용할 수 없으므로 촬영에 필요한 아이콘은 유니코드·CSS 도형·간단한 문자 기호로 대체한다.
 - 같은 문서의 `film`/`settings` 뷰를 전환하면 전체화면 상태와 댓글 타이머를 유지할 수 있다.
 - localStorage는 `file://`에서 브라우저별 제약이 있을 수 있으므로 저장 실패를 무시하고 현재 세션 기능은 유지한다.
+
+## Vercel 가져오기 조사
+- Vercel은 `next` 의존성과 `build` 스크립트를 기준으로 Next.js 프로젝트를 자동 감지한다.
+- 기본 `build`를 `next build --webpack`으로 두면 Vercel 대시보드에서 별도 명령을 입력할 필요가 없다.
+- 현재 테스트는 Vinext가 생성하는 `dist/index.html`을 검사하므로 Vinext 빌드는 `build:sites`로 분리하고 테스트가 이를 명시적으로 사용해야 한다.
+- Pages 전용 환경 변수와 base path는 `build:pages`에만 적용되므로 Vercel 루트 배포와 충돌하지 않는다.

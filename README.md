@@ -29,6 +29,7 @@ npm run dev
 
 ```bash
 npx tsc --noEmit
+npm run build
 npm test
 npm run build:pages
 ```
@@ -36,6 +37,15 @@ npm run build:pages
 ## 배포
 
 `.github/workflows/deploy-pages.yml`이 `main` 또는 `agent/github-pages-deploy` 브랜치의 변경을 정적 사이트로 빌드해 GitHub Pages에 배포합니다.
+
+### Vercel에서 가져오기
+
+1. Vercel 대시보드에서 **Add New → Project**를 선택합니다.
+2. `proracer5576-create/fake-youtube-prop` 저장소를 선택합니다.
+3. Framework Preset이 **Next.js**인지 확인합니다.
+4. Build Command와 Output Directory는 기본값을 유지하고 **Deploy**를 누릅니다.
+
+환경 변수는 필요하지 않습니다. 기본 `npm run build`는 Vercel용 Next.js 빌드이며, 기존 Vinext 검증 빌드는 `npm run build:sites`로 분리되어 있습니다.
 
 ## 오프라인 단일 HTML
 
