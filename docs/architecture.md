@@ -31,9 +31,16 @@
 - 현재 조회수가 기준 아래로 초기화되면 지연 타이머와 댓글 노출 상태를 함께 초기화한다.
 
 ## 배포 분기
-- 일반 개발/검증: Vinext 빌드와 루트 경로 사용.
+- 일반 개발/렌더링 검증: Vinext 개발 서버와 `build:sites` 빌드 사용.
+- Vercel: 표준 `next build --webpack`과 루트 경로 사용.
 - GitHub Pages: `GITHUB_PAGES=true`에서 정적 export와 `/fake-youtube-prop` base path 사용.
 - 공개 자산은 `NEXT_PUBLIC_BASE_PATH`를 통해 두 환경에서 같은 컴포넌트 코드를 사용한다.
+
+## 빌드 명령 책임
+- `build`: Vercel이 자동 실행하는 표준 Next.js 프로덕션 빌드.
+- `build:sites`: 기존 Vinext/Sites 산출물과 렌더링 테스트용 빌드.
+- `build:pages`: GitHub Pages용 정적 export 빌드.
+- `build:standalone`: 인터넷 없이 여는 단일 HTML 생성.
 
 ## 단일 HTML 상태 구조
 - `film`과 `settings` 두 화면을 한 DOM 안에서 전환한다.

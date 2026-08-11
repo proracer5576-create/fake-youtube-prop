@@ -38,6 +38,12 @@
 - 저장소 하위 경로(`/fake-youtube-prop`)에서도 이미지와 설정 페이지 이동이 정상 동작해야 한다.
 - `main` 및 배포 작업 브랜치에 변경이 올라오면 GitHub Actions가 정적 빌드와 Pages 배포를 수행한다.
 
+## Vercel 배포
+- Vercel에서 GitHub 저장소를 가져오면 Next.js 프로젝트로 자동 인식되어야 한다.
+- 별도의 Build Command, Output Directory, 환경 변수 입력 없이 기본 설정으로 배포할 수 있어야 한다.
+- Vercel용 표준 Next.js 빌드와 기존 Vinext 개발·검증, GitHub Pages 정적 export를 서로 독립적으로 유지한다.
+- Vercel 배포에서도 루트 경로의 썸네일과 `/settings` 이동이 정상 동작해야 한다.
+
 ## 단일 HTML 배포물
 - 인터넷 연결과 개발 서버 없이 더블클릭으로 실행되는 단일 `.html` 파일을 제공한다.
 - CSS, JavaScript, 썸네일 이미지와 아이콘을 파일 내부에 모두 포함한다.
