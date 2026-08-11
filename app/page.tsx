@@ -13,7 +13,6 @@ import {
   Play,
   Plus,
   Search,
-  Settings2,
   Share2,
   Signal,
   ThumbsDown,
@@ -228,13 +227,6 @@ export default function HomePage() {
             )}
           </section>
 
-          <div className="settings-entry" data-no-count>
-            <Link href="/settings" aria-label="촬영 설정 페이지 열기">
-              <Settings2 />
-              촬영 설정
-            </Link>
-            <span>댓글과 등장 타이밍은 여기에서 바꿀 수 있습니다.</span>
-          </div>
         </div>
 
         <nav className="bottom-nav" data-no-count aria-label="앱 하단 메뉴">
@@ -242,7 +234,9 @@ export default function HomePage() {
           <button type="button"><Search /><span>Shorts</span></button>
           <button type="button" className="create-button" aria-label="만들기"><Plus /></button>
           <button type="button"><MessageCircle /><span>구독</span></button>
-          <button type="button"><span className="nav-avatar">혜</span><span>나</span></button>
+          <Link href="/settings" aria-label="프로필 및 촬영 설정">
+            <span className="nav-avatar">혜</span><span>나</span>
+          </Link>
         </nav>
 
         {descriptionOpen && (

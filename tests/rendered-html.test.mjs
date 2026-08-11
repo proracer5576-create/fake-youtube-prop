@@ -44,6 +44,8 @@ test("100회 댓글 등장과 전체화면 제어 코드를 포함한다", async
   assert.match(page, /description-sheet/);
   assert.match(page, /settings\.showPlayButton/);
   assert.doesNotMatch(page, /화면의 빈 곳을 한 번 터치하면/);
+  assert.doesNotMatch(page, /settings-entry/);
+  assert.match(page, /href="\/settings" aria-label="프로필 및 촬영 설정"/);
   assert.match(settingsPage, /댓글과 등장 타이밍/);
   assert.match(settingsPage, /영상이 멈춘 시점/);
   assert.match(settingsPage, /requestFullscreen/);

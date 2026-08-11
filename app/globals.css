@@ -427,37 +427,6 @@ a:focus-visible {
   font-size: 13px;
 }
 
-.settings-entry {
-  display: grid;
-  justify-items: center;
-  gap: 9px;
-  padding: 130px 0 10px;
-}
-
-.settings-entry a {
-  display: flex;
-  min-width: 160px;
-  min-height: 48px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid #494949;
-  border-radius: 24px;
-  color: #d5d5d5;
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.settings-entry a svg {
-  width: 18px;
-}
-
-.settings-entry > span {
-  color: #686868;
-  font-size: 11px;
-}
-
 .control-section {
   overflow: hidden;
   border: 1px solid #3d3d3d;
@@ -987,7 +956,8 @@ textarea {
   backdrop-filter: blur(14px);
 }
 
-.bottom-nav button {
+.bottom-nav button,
+.bottom-nav > a {
   display: flex;
   min-width: 44px;
   min-height: 50px;
@@ -997,7 +967,9 @@ textarea {
   gap: 2px;
   border: 0;
   background: transparent;
+  color: inherit;
   font-size: 10px;
+  text-decoration: none;
 }
 
 .bottom-nav svg {
