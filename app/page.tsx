@@ -1,20 +1,17 @@
 "use client";
 
-import Image from "next/image";
+import Link from "next/link";
 import {
   BatteryMedium,
   Bell,
   ChevronDown,
   ChevronUp,
-  Clock3,
   Expand,
-  Fullscreen,
   Home,
   MessageCircle,
   MoreVertical,
   Play,
   Plus,
-  RotateCcw,
   Search,
   Settings2,
   Share2,
@@ -24,47 +21,14 @@ import {
   Wifi,
   X,
 } from "lucide-react";
-import { FormEvent, MouseEvent, useCallback, useEffect, useState } from "react";
-
-const STORAGE_KEY = "viewtube-prop-settings-v1";
-const DEFAULT_START_COUNT = 97;
-
-type StoredSettings = {
-  startCount: number;
-  viewCount: number;
-  showFakeStatusBar: boolean;
-  fakeTime: string;
-  battery: number;
-};
-
-const DEFAULT_SETTINGS: StoredSettings = {
-  startCount: DEFAULT_START_COUNT,
-  viewCount: DEFAULT_START_COUNT,
-  showFakeStatusBar: false,
-  fakeTime: "9:36",
-  battery: 20,
-};
-
-function readStoredSettings(): StoredSettings {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_SETTINGS;
-
-    const stored = JSON.parse(raw) as Partial<StoredSettings>;
-    return {
-      startCount: Number.isFinite(stored.startCount) ? Number(stored.startCount) : DEFAULT_START_COUNT,
-      viewCount: Number.isFinite(stored.viewCount) ? Number(stored.viewCount) : DEFAULT_START_COUNT,
-      showFakeStatusBar: Boolean(stored.showFakeStatusBar),
-      fakeTime: typeof stored.fakeTime === "string" ? stored.fakeTime : DEFAULT_SETTINGS.fakeTime,
-      battery: Number.isFinite(stored.battery)
-        ? Math.min(100, Math.max(0, Number(stored.battery)))
-        : DEFAULT_SETTINGS.battery,
-    };
-  } catch {
-    // 손상된 로컬 설정은 촬영 기본값으로 안전하게 복구한다.
-    return DEFAULT_SETTINGS;
-  }
-}
+import { MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  DEFAULT_SETTINGS,
+  formatCount,
+  PropSettings,
+  readStoredSettings,
+  saveStoredSettings,
+} from "./lib/prop-settings";
 
 function FakeStatusBar({ time, battery }: { time: string; battery: number }) {
   return (
@@ -80,48 +44,83 @@ function FakeStatusBar({ time, battery }: { time: string; battery: number }) {
   );
 }
 
-function formatCount(value: number) {
-  return new Intl.NumberFormat("ko-KR").format(value);
-}
-
 export default function HomePage() {
-  const [settings, setSettings] = useState<StoredSettings>(DEFAULT_SETTINGS);
-  const [startDraft, setStartDraft] = useState(String(DEFAULT_START_COUNT));
-  const [controlsOpen, setControlsOpen] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [notice, setNotice] = useState("");
+  const [settings, setSettings] = useState<PropSettings>(DEFAULT_SETTINGS);
+  const [visibleCommentIds, setVisibleCommentIds] = useState<Set<string>>(new Set());
+  const visibleCommentIdsRef = useRef<Set<string>>(new Set());
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [ready, setReady] = useState(false);
+  const commentTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
-    const stored = readStoredSettings();
-    setSettings(stored);
-    setStartDraft(String(stored.startCount));
+    setSettings(readStoredSettings());
     setReady(true);
   }, []);
 
   useEffect(() => {
-    if (!ready) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    } catch {
-      // 저장이 막혀도 현재 촬영 세션의 기능은 계속 동작한다.
-    }
-  }, [ready, settings]);
+    const activeIds = new Set(settings.comments.map((comment) => comment.id));
 
-  useEffect(() => {
-    const onFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
-    document.addEventListener("fullscreenchange", onFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+    // 조회수 기준 아래로 초기화된 댓글과 삭제된 댓글은 다시 숨긴다.
+    setVisibleCommentIds((current) => {
+      const next = new Set(
+        [...current].filter((id) => {
+          const comment = settings.comments.find((item) => item.id === id);
+          return comment && activeIds.has(id) && settings.viewCount >= comment.triggerCount;
+        }),
+      );
+      settings.comments
+        .filter((comment) => settings.viewCount >= comment.triggerCount && comment.delaySeconds === 0)
+        .forEach((comment) => next.add(comment.id));
+      visibleCommentIdsRef.current = next;
+      if (current.size === next.size && [...current].every((id) => next.has(id))) return current;
+      return next;
+    });
+
+    for (const [id, timer] of commentTimers.current) {
+      const comment = settings.comments.find((item) => item.id === id);
+      if (!comment || settings.viewCount < comment.triggerCount || comment.delaySeconds === 0) {
+        clearTimeout(timer);
+        commentTimers.current.delete(id);
+      }
+    }
+
+    settings.comments
+      .filter((comment) => settings.viewCount >= comment.triggerCount && comment.delaySeconds > 0)
+      .forEach((comment) => {
+        if (visibleCommentIdsRef.current.has(comment.id) || commentTimers.current.has(comment.id)) return;
+        const timer = setTimeout(() => {
+          setVisibleCommentIds((current) => {
+            const next = new Set(current).add(comment.id);
+            visibleCommentIdsRef.current = next;
+            return next;
+          });
+          commentTimers.current.delete(comment.id);
+        }, comment.delaySeconds * 1000);
+        commentTimers.current.set(comment.id, timer);
+      });
+  }, [settings.comments, settings.viewCount]);
+
+  useEffect(() => () => {
+    commentTimers.current.forEach((timer) => clearTimeout(timer));
   }, []);
 
+  const visibleComments = useMemo(
+    () => settings.comments.filter((comment) => visibleCommentIds.has(comment.id)),
+    [settings.comments, visibleCommentIds],
+  );
+
   const increaseViewCount = useCallback(() => {
-    setSettings((current) => ({ ...current, viewCount: current.viewCount + 1 }));
+    setSettings((current) => {
+      const next = { ...current, viewCount: current.viewCount + 1 };
+      saveStoredSettings(next);
+      return next;
+    });
   }, []);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
-      if (target?.matches("input, button, textarea, select")) return;
+      if (target?.matches("input, button, textarea, select, a")) return;
       if (event.code === "Space" || event.code === "Enter") {
         event.preventDefault();
         increaseViewCount();
@@ -132,40 +131,10 @@ export default function HomePage() {
   }, [increaseViewCount]);
 
   const handleSurfaceClick = (event: MouseEvent<HTMLElement>) => {
+    if (!ready) return;
     const target = event.target as HTMLElement;
     if (target.closest("[data-no-count]")) return;
     increaseViewCount();
-  };
-
-  const handleStartSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const nextStart = Number.parseInt(startDraft, 10);
-    if (!Number.isFinite(nextStart) || nextStart < 0) {
-      setNotice("시작 조회수는 0 이상의 숫자로 입력해 주세요.");
-      return;
-    }
-    setSettings((current) => ({ ...current, startCount: nextStart, viewCount: nextStart }));
-    setStartDraft(String(nextStart));
-    setNotice(`${formatCount(nextStart)}회로 설정했습니다.`);
-  };
-
-  const resetViewCount = () => {
-    setSettings((current) => ({ ...current, viewCount: current.startCount }));
-    setStartDraft(String(settings.startCount));
-    setNotice(`${formatCount(settings.startCount)}회로 되돌렸습니다.`);
-  };
-
-  const toggleFullscreen = async () => {
-    setNotice("");
-    try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      } else {
-        await document.documentElement.requestFullscreen({ navigationUI: "hide" });
-      }
-    } catch {
-      setNotice("이 브라우저에서는 전체화면을 시작할 수 없습니다. 브라우저 메뉴의 전체화면을 이용해 주세요.");
-    }
   };
 
   return (
@@ -190,12 +159,10 @@ export default function HomePage() {
         </header>
 
         <div className="video-stage" aria-label="일시정지된 영상, 1분 28초">
-          <Image
+          <img
             src="/movie-thumbnail.webp"
             alt="교실에서 세 학생이 발표할 때 긴장하지 않는 팁을 소개하는 영상 썸네일"
-            fill
-            priority
-            sizes="(max-width: 560px) 100vw, 560px"
+            draggable="false"
           />
           <div className="video-shade" />
           <span className="pause-play" aria-hidden="true"><Play size={38} fill="white" /></span>
@@ -208,8 +175,11 @@ export default function HomePage() {
 
         <div className="video-content">
           <div className="title-row">
-            <h1>발표할 때 심장 안 떨리는 꿀팁!</h1>
-            <button type="button" data-no-count aria-label="동영상 메뉴"><MoreVertical /></button>
+            <h1>{settings.videoTitle}</h1>
+            <div className="title-actions" data-no-count>
+              <button type="button" onClick={() => setDescriptionOpen(true)} aria-label="동영상 설명 열기"><ChevronDown /></button>
+              <button type="button" aria-label="동영상 메뉴"><MoreVertical /></button>
+            </div>
           </div>
           <p className="metadata" aria-live="polite">
             조회수 <strong key={settings.viewCount} className="count-pop">{formatCount(settings.viewCount)}회</strong>
@@ -232,118 +202,34 @@ export default function HomePage() {
             <button type="button" className="subscribe-button">구독</button>
           </div>
 
-          <section className={`comments-card ${settings.viewCount >= 100 ? "has-comment" : ""}`} aria-live="polite">
+          <section className={`comments-card ${visibleComments.length > 0 ? "has-comment" : ""}`} aria-live="polite">
             <div className="comments-heading">
               <strong>댓글</strong>
-              <span>{settings.viewCount >= 100 ? "1" : "0"}</span>
+              <span>{visibleComments.length}</span>
               <ChevronUp size={18} />
             </div>
-            {settings.viewCount >= 100 ? (
-              <div className="comment comment-arrive">
-                <div className="comment-avatar">ㅇ</div>
+            {visibleComments.length > 0 ? visibleComments.map((comment) => (
+              <div className="comment comment-arrive" key={comment.id}>
+                <div className="comment-avatar">{comment.author.replace("@", "").slice(0, 1) || "ㅇ"}</div>
                 <div>
-                  <span>@웃긴거좋아 · 방금 전</span>
-                  <p>솔직히 재미없어요... 하나도 안 웃김..ㅋㅋㅋㅋ</p>
+                  <span>{comment.author} · 방금 전</span>
+                  <p>{comment.text}</p>
                 </div>
               </div>
-            ) : (
-              <p className="empty-comment">조회수 100회가 되면 새 댓글이 표시됩니다.</p>
+            )) : (
+              <p className="empty-comment">아직 댓글이 없습니다.</p>
             )}
           </section>
 
           <p className="tap-hint"><Plus size={15} /> 화면의 빈 곳을 한 번 터치하면 조회수가 1 올라갑니다</p>
 
-          <section className="control-section" data-no-count aria-labelledby="control-title">
-            <button
-              type="button"
-              className="control-toggle"
-              onClick={() => setControlsOpen((open) => !open)}
-              aria-expanded={controlsOpen}
-              aria-controls="prop-controls"
-            >
-              <span><Settings2 /> <strong id="control-title">촬영 설정</strong></span>
-              {controlsOpen ? <ChevronUp /> : <ChevronDown />}
-            </button>
-
-            {controlsOpen && (
-              <div className="control-panel" id="prop-controls">
-                <form onSubmit={handleStartSubmit} className="setting-block">
-                  <label htmlFor="start-count">조회수 시작 숫자</label>
-                  <p>숫자를 저장하면 현재 조회수도 바로 그 숫자가 됩니다.</p>
-                  <div className="input-action-row">
-                    <input
-                      id="start-count"
-                      type="number"
-                      inputMode="numeric"
-                      min="0"
-                      value={startDraft}
-                      onChange={(event) => setStartDraft(event.target.value)}
-                    />
-                    <button type="submit" className="primary-button">설정</button>
-                  </div>
-                  <button type="button" className="secondary-button" onClick={resetViewCount}>
-                    <RotateCcw /> 저장된 {formatCount(settings.startCount)}회로 초기화
-                  </button>
-                </form>
-
-                <div className="setting-block">
-                  <span className="setting-label">상단 상태 표시</span>
-                  <p>전체화면에서는 실제 시스템 표시줄이 숨겨집니다.</p>
-                  <div className="segmented-control" role="group" aria-label="상태 표시줄 모드">
-                    <button
-                      type="button"
-                      className={!settings.showFakeStatusBar ? "active" : ""}
-                      onClick={() => setSettings((current) => ({ ...current, showFakeStatusBar: false }))}
-                    >
-                      완전히 숨김
-                    </button>
-                    <button
-                      type="button"
-                      className={settings.showFakeStatusBar ? "active" : ""}
-                      onClick={() => setSettings((current) => ({ ...current, showFakeStatusBar: true }))}
-                    >
-                      가짜 표시
-                    </button>
-                  </div>
-                </div>
-
-                {settings.showFakeStatusBar && (
-                  <div className="two-column-fields">
-                    <label>
-                      <span><Clock3 /> 표시 시간</span>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={settings.fakeTime}
-                        onChange={(event) => setSettings((current) => ({ ...current, fakeTime: event.target.value }))}
-                        placeholder="9:36"
-                      />
-                    </label>
-                    <label>
-                      <span><BatteryMedium /> 배터리 %</span>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={settings.battery}
-                        onChange={(event) => setSettings((current) => ({
-                          ...current,
-                          battery: Math.min(100, Math.max(0, Number(event.target.value))),
-                        }))}
-                      />
-                    </label>
-                  </div>
-                )}
-
-                <button type="button" className="fullscreen-button" onClick={toggleFullscreen}>
-                  {isFullscreen ? <X /> : <Fullscreen />}
-                  {isFullscreen ? "전체화면 나가기" : "전체화면으로 촬영하기"}
-                </button>
-
-                {notice && <p className="notice" role="status">{notice}</p>}
-              </div>
-            )}
-          </section>
+          <div className="settings-entry" data-no-count>
+            <Link href="/settings" aria-label="촬영 설정 페이지 열기">
+              <Settings2 />
+              촬영 설정
+            </Link>
+            <span>댓글과 등장 타이밍은 여기에서 바꿀 수 있습니다.</span>
+          </div>
         </div>
 
         <nav className="bottom-nav" data-no-count aria-label="앱 하단 메뉴">
@@ -353,6 +239,35 @@ export default function HomePage() {
           <button type="button"><MessageCircle /><span>구독</span></button>
           <button type="button"><span className="nav-avatar">혜</span><span>나</span></button>
         </nav>
+
+        {descriptionOpen && (
+          <div className="description-layer" data-no-count role="dialog" aria-modal="true" aria-labelledby="description-title">
+            <button type="button" className="description-backdrop" onClick={() => setDescriptionOpen(false)} aria-label="설명 닫기" />
+            <section className="description-sheet">
+              <header>
+                <h2 id="description-title">설명</h2>
+                <button type="button" onClick={() => setDescriptionOpen(false)} aria-label="설명 닫기"><X /></button>
+              </header>
+              <div className="description-body">
+                <h3>{settings.videoTitle}</h3>
+                <div className="description-stats">
+                  <div><strong>12</strong><span>좋아요</span></div>
+                  <div><strong>{formatCount(settings.viewCount)}</strong><span>조회수</span></div>
+                  <div><strong>6월 26일</strong><span>2026년</span></div>
+                </div>
+                <div className="hashtag-chips" aria-label="동영상 해시태그">
+                  {settings.hashtags.split(/[\s,]+/).filter(Boolean).map((tag) => (
+                    <span key={tag}>{tag.startsWith("#") ? tag : `#${tag}`}</span>
+                  ))}
+                </div>
+                <div className="description-copy">
+                  <p>{settings.videoTitle}</p>
+                  <p className="description-hashtags">{settings.hashtags}</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
       </section>
     </main>
   );
