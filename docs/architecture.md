@@ -9,6 +9,8 @@
 6. `SettingsPage`: 시작 숫자, 상태 표시줄, 시간, 배터리, 제목/해시태그, 댓글 내용/조건/지연, 초기화, 전체화면 제어.
 7. `prop-settings`: 두 페이지가 공유하는 localStorage 설정 모델과 기본값.
 8. `deploy-pages.yml`: 정적 Next.js 빌드 산출물을 GitHub Pages에 자동 배포하는 워크플로우.
+9. `scripts/build-standalone.mjs`: 썸네일을 data URL로 인라인해 한 파일짜리 촬영 앱을 생성하는 빌드 도구.
+10. `standalone/viewtube-prop.html`: 브라우저에서 직접 여는 오프라인 촬영용 최종 산출물.
 
 ## 상태
 - `viewCount`: 현재 조회수.
@@ -32,3 +34,8 @@
 - 일반 개발/검증: Vinext 빌드와 루트 경로 사용.
 - GitHub Pages: `GITHUB_PAGES=true`에서 정적 export와 `/fake-youtube-prop` base path 사용.
 - 공개 자산은 `NEXT_PUBLIC_BASE_PATH`를 통해 두 환경에서 같은 컴포넌트 코드를 사용한다.
+
+## 단일 HTML 상태 구조
+- `film`과 `settings` 두 화면을 한 DOM 안에서 전환한다.
+- 기존 v2 localStorage 모델과 같은 필드 구조를 사용해 웹 버전과 연출값을 맞춘다.
+- 댓글 타이머는 조회수 기준 이하로 초기화하면 취소·숨김 처리하고 다시 기준에 도달할 때 재시작한다.

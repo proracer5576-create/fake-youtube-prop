@@ -61,3 +61,16 @@ test("별도 촬영 설정 페이지를 렌더링한다", async () => {
   assert.match(html, /영상 정보/);
   assert.match(html, /등장 조회수/);
 });
+
+test("단일 HTML에 썸네일과 촬영 기능을 모두 포함한다", async () => {
+  const html = await readFile(new URL("../standalone/viewtube-prop.html", import.meta.url), "utf8");
+
+  assert.match(html, /data:image\/webp;base64,/);
+  assert.match(html, /viewtube-prop-standalone-v1/);
+  assert.match(html, /좀 지루해요/);
+  assert.match(html, /하나도 안 웃김/);
+  assert.match(html, /requestFullscreen/);
+  assert.doesNotMatch(html, /__THUMBNAIL_DATA_URL__/);
+  assert.doesNotMatch(html, /<script[^>]+src=/i);
+  assert.doesNotMatch(html, /<link[^>]+href=/i);
+});
