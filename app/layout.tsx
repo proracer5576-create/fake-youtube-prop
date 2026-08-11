@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+const PUBLIC_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const metadata: Metadata = {
   title: "ViewTube 촬영용 화면",
   description: "조회수를 터치로 조절하는 영화 촬영용 가짜 동영상 앱 화면",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: `${PUBLIC_BASE_PATH}/favicon.svg`,
+    shortcut: `${PUBLIC_BASE_PATH}/favicon.svg`,
   },
 };
 

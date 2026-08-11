@@ -12,3 +12,8 @@
 - 촬영 소품이므로 네트워크·로그인·서버 저장은 필요하지 않다. 설정은 `localStorage`로 보존한다.
 - 상표를 그대로 복제하기보다 촬영 프레임에서 익숙한 구조를 유지하는 가상의 `ViewTube` 앱으로 구성한다.
 
+## GitHub Pages 배포 조사
+- GitHub Pages는 서버 실행 없이 정적 산출물을 제공하므로 Next.js의 `output: "export"`가 필요하다.
+- 프로젝트 사이트 주소는 저장소 이름이 하위 경로가 되므로 Pages 빌드에서만 `basePath: "/fake-youtube-prop"`를 적용한다.
+- 앱 내부 `Link`는 `basePath`를 따르며, 일반 `<img>` 자산 경로는 빌드 환경의 base path를 직접 접두어로 사용한다.
+- 기존 로컬/Vinext/Sites 빌드는 base path 없이 유지해 개발 서버와 기존 배포를 깨뜨리지 않는다.
