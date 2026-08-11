@@ -60,10 +60,10 @@ export default function SettingsPage() {
     setNotice(`${formatCount(nextStart)}회로 설정했습니다.`);
   };
 
-  const resetViewCount = () => {
-    setSettings((current) => ({ ...current, viewCount: current.startCount }));
-    setStartDraft(String(settings.startCount));
-    setNotice(`${formatCount(settings.startCount)}회로 되돌렸습니다.`);
+  const applySceneStart = (nextStart: number) => {
+    setSettings((current) => ({ ...current, startCount: nextStart, viewCount: nextStart }));
+    setStartDraft(String(nextStart));
+    setNotice(`${formatCount(nextStart)}회 장면으로 초기화했습니다.`);
   };
 
   const addComment = () => {
@@ -122,9 +122,14 @@ export default function SettingsPage() {
                 />
                 <button type="submit" className="primary-button">설정</button>
               </div>
-              <button type="button" className="secondary-button" onClick={resetViewCount}>
-                <RotateCcw /> 저장된 {formatCount(settings.startCount)}회로 초기화
-              </button>
+              <div className="quick-reset-grid" aria-label="장면별 조회수 빠른 초기화">
+                <button type="button" className="secondary-button" onClick={() => applySceneStart(45)}>
+                  <RotateCcw /> 45회로 초기화
+                </button>
+                <button type="button" className="secondary-button" onClick={() => applySceneStart(97)}>
+                  <RotateCcw /> 97회로 초기화
+                </button>
+              </div>
               <p className="current-value">현재 촬영 화면: <strong>{formatCount(settings.viewCount)}회</strong></p>
             </form>
           </section>
@@ -194,6 +199,38 @@ export default function SettingsPage() {
                 placeholder="#발표꿀팁 #학교생활"
               />
               <p>띄어쓰기 또는 쉼표로 여러 개를 구분하세요.</p>
+              <div className="two-column-fields">
+                <label htmlFor="like-count">
+                  <span>좋아요 수</span>
+                  <input
+                    id="like-count"
+                    type="number"
+                    inputMode="numeric"
+                    min="0"
+                    step="1"
+                    value={settings.likeCount}
+                    onChange={(event) => setSettings((current) => ({
+                      ...current,
+                      likeCount: Math.max(0, Math.floor(Number(event.target.value))),
+                    }))}
+                  />
+                </label>
+                <label htmlFor="dislike-count">
+                  <span>싫어요 수</span>
+                  <input
+                    id="dislike-count"
+                    type="number"
+                    inputMode="numeric"
+                    min="0"
+                    step="1"
+                    value={settings.dislikeCount}
+                    onChange={(event) => setSettings((current) => ({
+                      ...current,
+                      dislikeCount: Math.max(0, Math.floor(Number(event.target.value))),
+                    }))}
+                  />
+                </label>
+              </div>
               <label htmlFor="paused-at">영상이 멈춘 시점(초)</label>
               <input
                 id="paused-at"
