@@ -241,6 +241,19 @@ a:focus-visible {
   padding: 14px 14px 106px;
 }
 
+.hashtag-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: -9px 0 15px;
+}
+
+.hashtag-line span {
+  color: #3ea6ff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .title-row {
   align-items: flex-start;
   justify-content: space-between;
@@ -312,6 +325,12 @@ a:focus-visible {
   border-radius: 23px;
   background: var(--surface-soft);
   font-size: 13px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.action-rail button.active {
+  background: #ffffff;
+  color: #0f0f0f;
 }
 
 .action-rail svg {
@@ -568,6 +587,72 @@ textarea {
   color: #fff;
 }
 
+.segmented-control.three-way {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.segmented-control.three-way button {
+  padding-inline: 4px;
+  font-size: 12px;
+}
+
+.thumbnail-picker {
+  gap: 10px;
+}
+
+.thumbnail-preview {
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid #363636;
+  border-radius: 12px;
+  background: #171717;
+}
+
+.thumbnail-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-upload-button {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px dashed #555;
+  border-radius: 10px;
+  color: #ddd;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.thumbnail-upload-button svg {
+  width: 17px;
+}
+
+.thumbnail-reset-button.is-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.hashtag-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: -6px 0 0;
+}
+
+.hashtag-preview span {
+  border-radius: 14px;
+  background: #183131;
+  padding: 5px 10px;
+  color: #dbecec;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .two-column-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -716,6 +801,27 @@ textarea {
   margin-top: 4px;
   color: #a4b2b2;
   font-size: 12px;
+}
+
+.help-body h3 {
+  margin-top: 4px;
+}
+
+.help-body h3:first-child {
+  margin-top: 0;
+}
+
+.help-body ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.help-body li {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #d5d5d5;
 }
 
 .hashtag-chips {
@@ -932,6 +1038,71 @@ textarea {
 
 .add-comment-button svg {
   width: 18px;
+}
+
+.scene-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scene-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #383838;
+  border-radius: 13px;
+  background: #121212;
+  padding: 10px 12px;
+}
+
+.scene-item-info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.scene-item-info strong {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scene-item-info span {
+  color: #a8a8a8;
+  font-size: 11px;
+}
+
+.scene-item-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.scene-item-actions .secondary-button {
+  min-height: 40px;
+}
+
+.scene-item-actions button[aria-label] {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #ddd;
+}
+
+.empty-scene {
+  margin: 0;
+  color: #858585;
+  font-size: 13px;
 }
 
 .settings-actions {

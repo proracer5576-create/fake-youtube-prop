@@ -25,6 +25,7 @@ import {
   DEFAULT_SETTINGS,
   formatCount,
   formatVideoTime,
+  parseHashtags,
   PropSettings,
   readStoredSettings,
   saveStoredSettings,
@@ -52,6 +53,7 @@ export default function HomePage() {
   const [visibleCommentIds, setVisibleCommentIds] = useState<Set<string>>(new Set());
   const visibleCommentIdsRef = useRef<Set<string>>(new Set());
   const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [ready, setReady] = useState(false);
   const commentTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -112,10 +114,32 @@ export default function HomePage() {
     [settings.comments, visibleCommentIds],
   );
   const progressPercent = Math.min(100, Math.max(0, (settings.pausedAtSeconds / VIDEO_DURATION_SECONDS) * 100));
+  const displayLikeCount = settings.likeCount + (settings.userReaction === "like" ? 1 : 0);
+  const displayDislikeCount = settings.dislikeCount + (settings.userReaction === "dislike" ? 1 : 0);
 
   const increaseViewCount = useCallback(() => {
     setSettings((current) => {
       const next = { ...current, viewCount: current.viewCount + 1 };
+      saveStoredSettings(next);
+      return next;
+    });
+  }, []);
+
+  const toggleReaction = useCallback((kind: "like" | "dislike") => {
+    setSettings((current) => {
+      const next: PropSettings = {
+        ...current,
+        userReaction: current.userReaction === kind ? "none" : kind,
+      };
+      saveStoredSettings(next);
+      return next;
+    });
+  }, []);
+
+  const resetToSettings = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setSettings((current) => {
+      const next: PropSettings = { ...current, viewCount: current.startCount, userReaction: "none" };
       saveStoredSettings(next);
       return next;
     });
@@ -164,7 +188,7 @@ export default function HomePage() {
 
         <div className="video-stage" aria-label="일시정지된 영상, 1분 28초">
           <img
-            src={`${PUBLIC_BASE_PATH}/movie-thumbnail.webp`}
+            src={settings.thumbnailUrl || `${PUBLIC_BASE_PATH}/movie-thumbnail.webp`}
             alt="교실에서 세 학생이 발표할 때 긴장하지 않는 팁을 소개하는 영상 썸네일"
             draggable="false"
           />
@@ -194,15 +218,41 @@ export default function HomePage() {
             <span>·</span> 2일 전
           </p>
 
+          {parseHashtags(settings.hashtags).length > 0 && (
+            <p className="hashtag-line" aria-label="동영상 해시태그">
+              {parseHashtags(settings.hashtags).map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
+            </p>
+          )}
+
           <div className="action-rail" data-no-count>
-            <button type="button" aria-label={`좋아요 ${formatCount(settings.likeCount)}개`}>
-              <ThumbsUp /><strong>{formatCount(settings.likeCount)}</strong>
+            <button
+              type="button"
+              className={settings.userReaction === "like" ? "active" : ""}
+              aria-pressed={settings.userReaction === "like"}
+              aria-label={`좋아요 ${formatCount(displayLikeCount)}개`}
+              onClick={() => toggleReaction("like")}
+            >
+              <ThumbsUp fill={settings.userReaction === "like" ? "currentColor" : "none"} />
+              <strong>{formatCount(displayLikeCount)}</strong>
             </button>
-            <button type="button" aria-label={`싫어요 ${formatCount(settings.dislikeCount)}개`}>
-              <ThumbsDown /><strong>{formatCount(settings.dislikeCount)}</strong>
+            <button
+              type="button"
+              className={settings.userReaction === "dislike" ? "active" : ""}
+              aria-pressed={settings.userReaction === "dislike"}
+              aria-label={`싫어요 ${formatCount(displayDislikeCount)}개`}
+              onClick={() => toggleReaction("dislike")}
+            >
+              <ThumbsDown fill={settings.userReaction === "dislike" ? "currentColor" : "none"} />
+              <strong>{formatCount(displayDislikeCount)}</strong>
             </button>
-            <button type="button" aria-label="공유"><Share2 /><span>공유</span></button>
-            <button type="button" aria-label="리믹스"><Expand /><span>리믹스</span></button>
+            <button type="button" aria-label="조회수와 반응을 설정값으로 리셋" onClick={resetToSettings}>
+              <Share2 /><span>공유</span>
+            </button>
+            <button type="button" aria-label="기능 설명 열기" onClick={(event) => { event.stopPropagation(); setHelpOpen(true); }}>
+              <Expand /><span>리믹스</span>
+            </button>
           </div>
 
           <div className="channel-row" data-no-count>
@@ -256,19 +306,51 @@ export default function HomePage() {
               <div className="description-body">
                 <h3>{settings.videoTitle}</h3>
                 <div className="description-stats">
-                  <div><strong>{formatCount(settings.likeCount)}</strong><span>좋아요</span></div>
+                  <div><strong>{formatCount(displayLikeCount)}</strong><span>좋아요</span></div>
                   <div><strong>{formatCount(settings.viewCount)}</strong><span>조회수</span></div>
                   <div><strong>6월 26일</strong><span>2026년</span></div>
                 </div>
                 <div className="hashtag-chips" aria-label="동영상 해시태그">
-                  {settings.hashtags.split(/[\s,]+/).filter(Boolean).map((tag) => (
-                    <span key={tag}>{tag.startsWith("#") ? tag : `#${tag}`}</span>
+                  {parseHashtags(settings.hashtags).map((tag) => (
+                    <span key={tag}>{tag}</span>
                   ))}
                 </div>
                 <div className="description-copy">
                   <p>{settings.videoTitle}</p>
                   <p className="description-hashtags">{settings.hashtags}</p>
                 </div>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {helpOpen && (
+          <div className="description-layer" data-no-count role="dialog" aria-modal="true" aria-labelledby="help-title">
+            <button type="button" className="description-backdrop" onClick={() => setHelpOpen(false)} aria-label="기능 설명 닫기" />
+            <section className="description-sheet help-sheet">
+              <header>
+                <h2 id="help-title">기능 설명</h2>
+                <button type="button" onClick={() => setHelpOpen(false)} aria-label="기능 설명 닫기"><X /></button>
+              </header>
+              <div className="description-body help-body">
+                <h3>촬영 화면</h3>
+                <ul>
+                  <li>버튼이 아닌 빈 화면을 누르면 조회수가 1 증가합니다. 키보드 Space/Enter도 동일합니다.</li>
+                  <li>좋아요·싫어요 버튼은 실제로 눌리며, 다시 누르면 취소됩니다.</li>
+                  <li><strong>공유</strong> 버튼: 조회수와 좋아요·싫어요 반응을 촬영 설정에 저장된 값으로 즉시 리셋합니다. 재촬영(테이크) 사이에 사용하세요.</li>
+                  <li><strong>리믹스</strong> 버튼: 지금 보고 있는 이 기능 설명을 엽니다.</li>
+                  <li>제목 옆 화살표를 누르면 설명(하단 시트) 창이 열립니다.</li>
+                  <li>하단 메뉴 맨 오른쪽 <strong>혜 / 나</strong> 프로필을 누르면 촬영 설정으로 이동합니다.</li>
+                </ul>
+                <h3>촬영 설정 화면</h3>
+                <ul>
+                  <li>조회수 시작 숫자를 직접 입력하거나 45회·97회 장면 버튼으로 빠르게 초기화합니다.</li>
+                  <li>상단 상태 표시줄을 숨기거나 촬영용 가짜 시간·배터리로 바꿉니다.</li>
+                  <li>영상 제목·해시태그·좋아요/싫어요 수·현재 반응 상태·멈춘 시점·재생 버튼 표시 여부를 편집합니다.</li>
+                  <li>썸네일 카드에서 새 이미지를 올리거나 기본 썸네일로 되돌립니다.</li>
+                  <li>댓글마다 작성자·내용·등장 조회수·지연 시간을 설정합니다.</li>
+                  <li>전체화면으로 촬영을 시작하거나 일반 화면으로 돌아갑니다.</li>
+                </ul>
               </div>
             </section>
           </div>
