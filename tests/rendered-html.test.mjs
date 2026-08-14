@@ -42,6 +42,8 @@ test("100회 댓글 등장과 전체화면 제어 코드를 포함한다", async
   assert.match(settingsModel, /showPlayButton: false/);
   assert.match(settingsModel, /likeCount: 12/);
   assert.match(settingsModel, /dislikeCount: 0/);
+  assert.match(settingsModel, /uploadDateText: "2일 전"/);
+  assert.match(settingsModel, /subscriberCount: 128/);
   assert.match(settingsModel, /#초등학생/);
   assert.match(settingsModel, /stored\.hashtags === LEGACY_DEFAULT_HASHTAGS/);
   assert.match(page, /setTimeout/);
@@ -49,6 +51,9 @@ test("100회 댓글 등장과 전체화면 제어 코드를 포함한다", async
   assert.match(page, /settings\.showPlayButton/);
   assert.match(page, /settings\.likeCount/);
   assert.match(page, /settings\.dislikeCount/);
+  assert.match(page, /settings\.uploadDateText\.trim\(\)/);
+  assert.match(page, /formatCount\(settings\.subscriberCount\)/);
+  assert.doesNotMatch(page, /<span>·<\/span> 2일 전/);
   assert.doesNotMatch(page, /화면의 빈 곳을 한 번 터치하면/);
   assert.doesNotMatch(page, /settings-entry/);
   assert.match(page, /href="\/settings" aria-label="프로필 및 촬영 설정"/);
@@ -56,6 +61,9 @@ test("100회 댓글 등장과 전체화면 제어 코드를 포함한다", async
   assert.match(settingsPage, /영상이 멈춘 시점/);
   assert.match(settingsPage, /좋아요 수/);
   assert.match(settingsPage, /싫어요 수/);
+  assert.match(settingsPage, /업로드 날짜 문구/);
+  assert.match(settingsPage, /구독자 수/);
+  assert.match(settingsPage, /uploadDateText: ""/);
   assert.match(settingsPage, /applySceneStart\(45\)/);
   assert.match(settingsPage, /applySceneStart\(97\)/);
   assert.match(settingsPage, /requestFullscreen/);

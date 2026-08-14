@@ -17,6 +17,8 @@ export type UserReaction = "none" | "like" | "dislike";
 export type PropSettings = {
   videoTitle: string;
   hashtags: string;
+  uploadDateText: string;
+  subscriberCount: number;
   likeCount: number;
   dislikeCount: number;
   userReaction: UserReaction;
@@ -34,6 +36,8 @@ export type PropSettings = {
 export const DEFAULT_SETTINGS: PropSettings = {
   videoTitle: "발표할 때 심장 안 떨리는 꿀팁!",
   hashtags: DEFAULT_HASHTAGS,
+  uploadDateText: "2일 전",
+  subscriberCount: 128,
   likeCount: 12,
   dislikeCount: 0,
   userReaction: "none",
@@ -89,6 +93,12 @@ function normalizeSettings(stored: Partial<PropSettings>): PropSettings {
     hashtags: stored.hashtags === LEGACY_DEFAULT_HASHTAGS
       ? DEFAULT_HASHTAGS
       : typeof stored.hashtags === "string" ? stored.hashtags : DEFAULT_SETTINGS.hashtags,
+    uploadDateText: typeof stored.uploadDateText === "string"
+      ? stored.uploadDateText
+      : DEFAULT_SETTINGS.uploadDateText,
+    subscriberCount: Number.isFinite(stored.subscriberCount)
+      ? Math.max(0, Math.floor(Number(stored.subscriberCount)))
+      : DEFAULT_SETTINGS.subscriberCount,
     likeCount: Number.isFinite(stored.likeCount)
       ? Math.max(0, Math.floor(Number(stored.likeCount)))
       : DEFAULT_SETTINGS.likeCount,

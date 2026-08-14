@@ -276,6 +276,38 @@ export default function SettingsPage() {
                   ))}
                 </div>
               )}
+              <label htmlFor="upload-date-text">업로드 날짜 문구</label>
+              <div className="input-action-row">
+                <input
+                  id="upload-date-text"
+                  value={settings.uploadDateText}
+                  maxLength={30}
+                  onChange={(event) => setSettings((current) => ({
+                    ...current,
+                    uploadDateText: event.target.value,
+                  }))}
+                  placeholder="예: 2일 전 또는 2026. 8. 14."
+                />
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setSettings((current) => ({ ...current, uploadDateText: "" }))}
+                >숨기기</button>
+              </div>
+              <p>원하는 날짜나 상대 시간을 그대로 입력하세요. 비워두면 조회수 뒤의 구분점과 업로드 표시가 함께 숨겨집니다.</p>
+              <label htmlFor="subscriber-count">구독자 수</label>
+              <input
+                id="subscriber-count"
+                type="number"
+                inputMode="numeric"
+                min="0"
+                step="1"
+                value={settings.subscriberCount}
+                onChange={(event) => setSettings((current) => ({
+                  ...current,
+                  subscriberCount: Math.max(0, Math.floor(Number(event.target.value))),
+                }))}
+              />
               <div className="two-column-fields">
                 <label htmlFor="like-count">
                   <span>좋아요 수</span>

@@ -215,7 +215,9 @@ export default function HomePage() {
           </div>
           <p className="metadata" aria-live="polite">
             조회수 <strong key={settings.viewCount} className="count-pop">{formatCount(settings.viewCount)}회</strong>
-            <span>·</span> 2일 전
+            {settings.uploadDateText.trim() && (
+              <><span>·</span> {settings.uploadDateText.trim()}</>
+            )}
           </p>
 
           {parseHashtags(settings.hashtags).length > 0 && (
@@ -259,7 +261,7 @@ export default function HomePage() {
             <div className="channel-avatar">혜</div>
             <div className="channel-copy">
               <strong>혜민의 교실생활</strong>
-              <span>구독자 128명</span>
+              <span>구독자 {formatCount(settings.subscriberCount)}명</span>
             </div>
             <button type="button" className="subscribe-button">구독</button>
           </div>
@@ -308,7 +310,9 @@ export default function HomePage() {
                 <div className="description-stats">
                   <div><strong>{formatCount(displayLikeCount)}</strong><span>좋아요</span></div>
                   <div><strong>{formatCount(settings.viewCount)}</strong><span>조회수</span></div>
-                  <div><strong>6월 26일</strong><span>2026년</span></div>
+                  {settings.uploadDateText.trim() && (
+                    <div><strong>{settings.uploadDateText.trim()}</strong><span>업로드</span></div>
+                  )}
                 </div>
                 <div className="hashtag-chips" aria-label="동영상 해시태그">
                   {parseHashtags(settings.hashtags).map((tag) => (
@@ -346,7 +350,7 @@ export default function HomePage() {
                 <ul>
                   <li>조회수 시작 숫자를 직접 입력하거나 45회·97회 장면 버튼으로 빠르게 초기화합니다.</li>
                   <li>상단 상태 표시줄을 숨기거나 촬영용 가짜 시간·배터리로 바꿉니다.</li>
-                  <li>영상 제목·해시태그·좋아요/싫어요 수·현재 반응 상태·멈춘 시점·재생 버튼 표시 여부를 편집합니다.</li>
+                  <li>영상 제목·해시태그·업로드 날짜 문구·구독자 수·좋아요/싫어요 수·현재 반응 상태·멈춘 시점·재생 버튼 표시 여부를 편집합니다.</li>
                   <li>썸네일 카드에서 새 이미지를 올리거나 기본 썸네일로 되돌립니다.</li>
                   <li>댓글마다 작성자·내용·등장 조회수·지연 시간을 설정합니다.</li>
                   <li>전체화면으로 촬영을 시작하거나 일반 화면으로 돌아갑니다.</li>
